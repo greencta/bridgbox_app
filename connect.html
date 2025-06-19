@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IrysMail - Connect Wallet</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Ethers.js CDN -->
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="application/javascript"></script>
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fc;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-800 flex flex-col items-center justify-center">
+
+    <div class="w-full h-full flex flex-col items-center justify-center text-center p-8">
+        <p class="text-sm font-semibold tracking-widest text-gray-500 mb-2">IRYSMAIL</p>
+        <h1 class="text-5xl font-bold text-gray-900 mb-8">Start your experience now</h1>
+        <button id="connect-button" class="bg-black text-white font-semibold px-8 py-3 rounded-full hover:bg-gray-800 transition-colors duration-300">
+            Connect Wallet
+        </button>
+        <p id="connection-status" class="mt-4 text-sm text-red-600"></p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const connectButton = document.getElementById('connect-button');
+            const connectionStatus = document.getElementById('connection-status');
+
+            // If user is already connected, redirect them to the app
+            if (localStorage.getItem('walletConnected') === 'true') {
+                window.location.href = 'app.html';
+                return; // Stop script execution
+            }
+
+            // The actual wallet connection function
+            async function connectWallet() {
+                // Check if a Web3 wallet (like MetaMask) is installed
+                if (typeof window.ethereum === 'undefined') {
+                    connectionStatus.textContent = 'Please install a Web3 wallet like MetaMask.';
+                    return;
+                }
+
+                connectionStatus.textContent = 'Opening wallet...';
+                connectButton.disabled = true;
+
+                try {
+                    // Create an ethers provider from the wallet's provider
+                    const provider = new ethers.providers.Web3Provider(window.ethereum);
+                    
+                    // Request account access. This opens the wallet's connection prompt.
+                    await provider.send("eth_requestAccounts", []);
+                    
+                    // Get the user's account (signer)
+                    const signer = provider.getSigner();
+                    const walletAddress = await signer.getAddress();
+                    
+                    console.log(`Wallet connected: ${walletAddress}`);
+                    
+                    // Store connection state and address in localStorage
+                    localStorage.setItem('walletConnected', 'true');
+                    localStorage.setItem('walletAddress', walletAddress);
+                    
+                    // Redirect to the main app page on success
+                    window.location.href = 'app.html';
+
+                } catch (error) {
+                    console.error("Failed to connect wallet:", error);
+                    // Handle user rejection or other errors
+                    if (error.code === 4001) { // EIP-1193 user rejection error
+                        connectionStatus.textContent = 'Connection request rejected.';
+                    } else {
+                        connectionStatus.textContent = 'Failed to connect. Please try again.';
+                    }
+                    connectButton.disabled = false;
+                }
+            }
+
+            connectButton.addEventListener('click', connectWallet);
+        });
+    </script>
+</body>
+</html>
