@@ -72,10 +72,11 @@
                     const url = "https://devnet.irys.xyz"; // Use devnet for testing
                     const token = "matic"; // Polygon Mumbai is a common devnet choice
                     
+                    // **UPDATED with a more reliable public RPC endpoint**
                     const webIrys = new WebIrys({
                         url: url,
                         token: token,
-                        wallet: { rpcUrl: "https://rpc-mumbai.maticvigil.com", name: "ethersv5", provider: provider }
+                        wallet: { rpcUrl: "https://matic-mumbai.chainstacklabs.com", name: "ethersv5", provider: provider }
                     });
 
                     await webIrys.ready();
@@ -92,7 +93,7 @@
                     connectionStatus.classList.add('text-red-600');
                     if (error.code === 4001) {
                         connectionStatus.textContent = 'Wallet connection request rejected.';
-                    } else if (error.message.includes("Could not find balance")) {
+                    } else if (error.message && error.message.includes("Could not find balance")) {
                         connectionStatus.textContent = 'Connected, but please switch to the Polygon Mumbai testnet in your wallet.';
                     } 
                     else {
