@@ -6,8 +6,8 @@
     <title>IrysMail - Connect Wallet</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Ethers.js CDN for wallet interaction -->
-    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="application/javascript"></script>
+    <!-- Ethers.js CDN for wallet interaction - UPDATED to a reliable link -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js" xintegrity="sha512-FDc6O3T1qO5M4VoDcoTsgQPinps_jiaIChdDk3k_I2LuG3ktcO3ObrTmr2GGPx7iI9S9xKkU1TGGbyj2OJ4y1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!-- Irys Web SDK for interacting with the Irys Network -->
     <script src="https://unpkg.com/@irys/sdk/build/web.bundle.js"></script>
     <!-- Google Fonts - Inter -->
@@ -49,9 +49,9 @@
                 connectionStatus.classList.remove('text-red-600');
                 connectionStatus.classList.add('text-gray-600');
 
-                // 1. Check for MetaMask
+                // 1. Check for a wallet provider
                 if (!window.ethereum) {
-                    connectionStatus.textContent = 'Please install a Web3 wallet like MetaMask.';
+                    connectionStatus.textContent = 'Please install a Web3 wallet like MetaMask or Rabby.';
                     connectionStatus.classList.add('text-red-600');
                     return;
                 }
@@ -59,7 +59,7 @@
                 connectButton.disabled = true;
 
                 try {
-                    // 2. Connect to MetaMask Wallet
+                    // 2. Connect to the wallet
                     connectionStatus.textContent = 'Connecting to wallet...';
                     const provider = new ethers.providers.Web3Provider(window.ethereum);
                     await provider.send("eth_requestAccounts", []);
@@ -72,7 +72,6 @@
                     const url = "https://devnet.irys.xyz"; // Use devnet for testing
                     const token = "matic"; // Polygon Mumbai is a common devnet choice
                     
-                    // **UPDATED with a more reliable public RPC endpoint**
                     const webIrys = new WebIrys({
                         url: url,
                         token: token,
