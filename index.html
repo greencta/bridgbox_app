@@ -34,13 +34,29 @@
             text-align: center;
             font-size: 1.5rem; /* 24px */
             border-radius: 0.75rem; /* 12px */
-            border: 1px solid #d1d5db; /* gray-300 */
+            border: 1px solid #e5e7eb; /* gray-200 */
+            background-color: #ffffff;
+            transition: all 0.2s;
             -moz-appearance: textfield;
+        }
+        .pin-input:focus {
+            outline: none;
+            border-color: #47FED0;
+            box-shadow: 0 0 0 3px rgba(71, 254, 208, 0.3);
         }
         .pin-input::-webkit-outer-spin-button,
         .pin-input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .animate-shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
         }
     </style>
 </head>
@@ -48,14 +64,14 @@
 
     <!-- Header Section -->
     <header class="absolute top-0 left-0 w-full max-w-7xl mx-auto px-6 py-5">
-        <div class="font-extrabold text-1xl tracking-tight">
-            IRYSMAIL
-        </div>
+        <a href="" class="font-extrabold text-2xl tracking-tight">
+            
+        </a>
     </header>
 
     <!-- Auth Card -->
     <main class="w-full max-w-md">
-        <div class="bg-white/70 backdrop-blur-xl border border-gray-200/80 p-8 md:p-10 rounded-2xl shadow-lg text-center">
+        <div class="bg-white/80 backdrop-blur-xl border border-gray-200/80 p-8 md:p-10 rounded-2xl shadow-lg text-center">
             <h1 class="text-2xl font-bold text-gray-800">Enter Access Code</h1>
             <p class="text-gray-500 mt-2">Please enter your 4-digit code to continue.</p>
 
@@ -67,7 +83,7 @@
                     <input type="number" class="pin-input" maxlength="1" data-index="3">
                 </div>
 
-                <button type="submit" class="w-full mt-8 bg-black text-white font-semibold py-3 rounded-full hover:bg-gray-800 transition-colors duration-300">
+                <button type="submit" id="submitButton" class="w-full mt-8 bg-black text-white font-semibold py-3 rounded-full hover:bg-gray-800 transition-colors duration-300">
                     Continue
                 </button>
                 <p id="errorMessage" class="mt-4 text-sm text-red-500 h-5"></p>
@@ -80,17 +96,14 @@
             const pinContainer = document.getElementById('pin-container');
             const inputs = [...pinContainer.querySelectorAll('.pin-input')];
             const authForm = document.getElementById('authForm');
+            const submitButton = document.getElementById('submitButton');
             const errorMessage = document.getElementById('errorMessage');
-            
-            // This is the correct code for this demo page.
-            const CORRECT_PIN = "1234"; 
 
             pinContainer.addEventListener('input', (e) => {
                 const target = e.target;
                 const value = target.value;
                 const index = parseInt(target.dataset.index);
 
-                // If a value is entered, move to the next input
                 if (value && index < inputs.length - 1) {
                     inputs[index + 1].focus();
                 }
@@ -100,13 +113,11 @@
                 const target = e.target;
                 const index = parseInt(target.dataset.index);
 
-                // Handle backspace
                 if (e.key === 'Backspace' && !target.value && index > 0) {
                     inputs[index - 1].focus();
                 }
             });
             
-            // Handle paste
             inputs[0].addEventListener('paste', (e) => {
                 e.preventDefault();
                 const paste = e.clipboardData.getData('text');
@@ -118,53 +129,57 @@
                 }
             });
 
-            authForm.addEventListener('submit', (e) => {
+            authForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 errorMessage.textContent = '';
+                submitButton.disabled = true;
+                submitButton.textContent = 'Verifying...';
 
                 const enteredPin = inputs.map(input => input.value).join('');
 
                 if (enteredPin.length !== 4) {
                     errorMessage.textContent = 'Please enter a 4-digit code.';
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Continue';
                     return;
                 }
 
-                if (enteredPin === CORRECT_PIN) {
-                    // On success, redirect to the main app page
-                    // For this demo, we can just show a success message
-                    errorMessage.textContent = 'Success! Redirecting...';
-                    errorMessage.classList.remove('text-red-500');
-                    errorMessage.classList.add('text-green-500');
+                try {
+                    const response = await fetch('check_pin.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ pin: enteredPin })
+                    });
                     
-                    setTimeout(() => {
-                        // Replace 'app.html' with your actual main application page
-                        window.location.href = 'app.html'; 
-                    }, 1000);
-                } else {
-                    errorMessage.textContent = 'Invalid code. Please try again.';
-                    // Shake effect for wrong password
-                    pinContainer.classList.add('animate-shake');
-                    setTimeout(() => pinContainer.classList.remove('animate-shake'), 500);
-                    // Clear inputs
-                    inputs.forEach(input => input.value = '');
-                    inputs[0].focus();
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        errorMessage.textContent = 'Success! Redirecting...';
+                        errorMessage.classList.remove('text-red-500');
+                        errorMessage.classList.add('text-green-500');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'app.html';
+                        }, 1000);
+                    } else {
+                        errorMessage.textContent = result.message || 'Invalid code. Please try again.';
+                        pinContainer.classList.add('animate-shake');
+                        setTimeout(() => pinContainer.classList.remove('animate-shake'), 500);
+                        inputs.forEach(input => input.value = '');
+                        inputs[0].focus();
+                    }
+                } catch (error) {
+                    console.error('Authentication Error:', error);
+                    errorMessage.textContent = 'An error occurred. Please try again.';
+                } finally {
+                    if (errorMessage.textContent.includes('Success!') === false) {
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Continue';
+                    }
                 }
             });
-            
-            // Add a simple shake animation with Tailwind
-            const style = document.createElement('style');
-            style.innerHTML = `
-                @keyframes shake {
-                    10%, 90% { transform: translate3d(-1px, 0, 0); }
-                    20%, 80% { transform: translate3d(2px, 0, 0); }
-                    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-                    40%, 60% { transform: translate3d(4px, 0, 0); }
-                }
-                .animate-shake {
-                    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-                }
-            `;
-            document.head.appendChild(style);
         });
     </script>
 </body>
