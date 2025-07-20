@@ -1,0 +1,40 @@
+/* File: src/App.css */
+
+/* Main container for the entire page */
+.app-container {
+  @apply w-full h-screen flex flex-col items-center justify-center text-center p-8 bg-white;
+}
+
+/* "IRYSMAIL" logo text */
+.logo-text {
+  @apply text-xs font-medium tracking-[0.3em] text-gray-500 mb-4;
+}
+
+/* Disconnected State Heading */
+.main-heading {
+  @apply text-5xl font-light text-black mb-8;
+}
+
+/* --- Connected State Styles --- */
+
+.welcome-heading {
+  @apply text-3xl font-light text-gray-800;
+}
+
+.connected-info {
+  @apply mt-4 text-gray-500;
+}
+
+.address-display {
+  @apply font-mono text-sm bg-gray-100 text-gray-800 px-2 py-1 rounded-md;
+}
+
+/* --- Shared Elements --- */
+
+.action-button {
+  @apply bg-black text-white font-semibold px-8 py-3 rounded-full hover:bg-gray-800 transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed;
+}
+
+.status-message {
+  @apply mt-4 text-sm text-red-600 h-5;
+}

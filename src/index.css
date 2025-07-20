@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.app-shell {
+  @apply h-screen w-full bg-white flex font-sans;
+}
+
+/* Updated scrollbar for light mode */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Quill editor styles for light mode */
+.ql-editor.ql-blank::before {
+  color: #a0aec0 !important;
+  font-style: normal !important;
+}
+.ql-snow .ql-stroke { stroke: #4A5568; }
+.ql-snow .ql-fill { fill: #4A5568; }
+.ql-snow .ql-picker-label { color: #4A5568; }
+.ql-snow .ql-picker-options { background-color: #FFFFFF; border-color: #E2E8F0; }
+.ql-snow .ql-picker-item:hover { background-color: #F7FAFC; }
+.ql-snow .ql-active .ql-stroke { stroke: #2D3748; }
+.ql-snow .ql-active .ql-picker-label { color: #2D3748; }
+.ql-toolbar.ql-snow { border-color: #E2E8F0; }
+.ql-container.ql-snow { border-color: #E2E8F0; }
